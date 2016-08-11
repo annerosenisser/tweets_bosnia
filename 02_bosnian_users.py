@@ -145,7 +145,8 @@ try:
 	twitterStream = Stream(auth, listener())
 	twitterStream.filter(track=keyword_list,  # follow = tweeters,
 						 languages=['bs', 'hr', 'sr'],
-						 locations=[15.5, 42.4, 19.5, 45.4])
+						 locations=[15.5, 42.4, 19.5, 45.4]) # Locations within Bosnia,
+	# use Bosnian longitudes and latitudes.
 
 	# Print every 10 minutes the number of new tweets to terminal:
 	print("Wrote %d new tweeters to file" % counter)
