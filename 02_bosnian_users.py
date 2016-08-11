@@ -8,13 +8,11 @@
 # https://dev.twitter.com/rest/reference/get/followers/ids
 
 from tweepy import OAuthHandler
-from tweepy import API
 import json
 import time
 from tweepy.streaming import StreamListener
 from tweepy import Stream
 from sys import platform
-import os
 import config # local config file to store password and user keys etc.
 
 print("Started running script 02_bosnian_users.py at %s" % time.ctime())
@@ -65,7 +63,7 @@ keyword_list +=  elections # combine elections and keyword list.
 if platform == "darwin":
 	doc_path = '/Users/Annerose/Documents/15-16/Data/bs_all_tweets.txt'
 if platform == "linux" or platform == "linux2":
-	doc_path = '/home/annerose/Python/bs_all_tweets.txt.txt'
+	doc_path = '/home/annerose/Python/bs_all_tweets.txt'
 
 # ****************************************** #
 try: # if file is already existent
@@ -83,11 +81,11 @@ except: # if file doesn't exist, create it and add "[" at the very beginning.
 		f.write(u'[')
 # ****************************************** #
 
+# Get the Twitter keys
 ckey = config.ckey
 consumer_secret = config.consumer_secret
 access_token_key = config.access_token_key
 access_token_secret = config.access_token_secret
-
 
 
 auth = OAuthHandler(ckey, consumer_secret) #OAuth object
@@ -103,7 +101,7 @@ class listener(StreamListener):
 		# data is of type str, so it has to be transformed to a dict:
 		data = json.loads(data)
 		# print(type(data))
-		# subset the dict:
+		# subset the dict (use only certain parts of the tweet):
 		keys = ['screen_name', 'name', 'user_id', 'location',
 				'time_zone', 'profile_created_at',
 				'friends_count', 'followers_count',
@@ -129,7 +127,7 @@ class listener(StreamListener):
 		tweet['tweet_lang'] = data['lang']
 		print(tweet)
 
-		excluded_locs = ['Macedonia']
+		excluded_locs = ['Macedonia'] # don't write tweets from excluded_locs to file.
 		if tweet['location'] not in excluded_locs:
 			with open(doc_path, 'a+') as outfile:
 				json.dump(tweet, outfile)
@@ -140,17 +138,7 @@ class listener(StreamListener):
 
 	def on_error(self, status):
 			print(status)
-# ****************************************** #
-# What to do when the document is shutting down:
-def close_doc(doc):
-	with open(doc, 'a+') as f:
-		# Delete last "\n" and last ","
-		f.seek(-1, os.SEEK_END)
-		f.truncate()
 
-		# Add last "]"
-		f.write(u']')
-	# Close file.
 # ****************************************** #
 
 try:
@@ -168,8 +156,21 @@ except KeyboardInterrupt:
 		# Delete last "\n" and last ","
 		f.seek(0, 2)  # set curser from beginning to end.
 		size = f.tell()  # tell the length of the file.
-		f.truncate(size - 2)  # truncate to this length.
+		f.truncate(size - 2)  # truncate to this length (remove last two characters).
 
 		# Add last "]"
 		f.write(u']')
+		# Close file.
+
+# ****************************************** #
+# What to do when the document is shutting down (normally,
+# without keyboard interrupt):
+with open(doc_path, 'a+') as f:
+	# Delete last "\n" and last ","
+	f.seek(0, 2)  # set curser from beginning to end.
+	size = f.tell()  # tell the length of the file.
+	f.truncate(size - 2)  # truncate to this length (remove last two characters).
+
+	# Add last "]"
+	f.write(u']')
 	# Close file.
