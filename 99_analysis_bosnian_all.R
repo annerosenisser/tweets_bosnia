@@ -14,7 +14,7 @@ setwd("~/Documents/15-16/Code/tweets_bosnia")
 # --------------------------- #
 # Load required packages ----
 require(jsonlite)
-require(lubridate) # for easily cleaning time stamps
+# require(lubridate) # for easily cleaning time stamps
 # --------------------------- #
 # Important: don't have the package rjson loaded!! 
 # rjson also has the command fromJSON, which could mask
@@ -22,17 +22,39 @@ require(lubridate) # for easily cleaning time stamps
 # fromJSON only works with jsonlite, not rjson! 
 detach("package:rjson", unload=TRUE)
 
-tweets <- fromJSON("data/tweets/bosnian_politicians_tweets.txt",
+
+tweets_path <- "data/tweets/bosnian_politicians_tweets.txt"
+# tweets_path <- "~/Documents/15-16/Data/bosnian_politicians_tweets.txt"
+
+tweets <- fromJSON(tweets_path,
                      simplifyDataFrame = T, flatten=TRUE)
+
 
 # tweets <- readLines(bosnian_all_tweets, warn = "F")
 
 
 tweets <- fromJSON("~/Documents/15-16/Data/bs_all_tweets.txt",
                    simplifyDataFrame = T)
-
+# ------------------------------ # 
 names(tweets)
 
+# Check whether there are any duplicate tweets (= 
+# check that the procedure of NOT adding duplicate 
+# tweets to the file effectively works):
+length(tweets$id_str)
+
+length(unique(tweets$id_str)) 
+# yes, the procedure works efficiently. There is only one 
+# duplicate (probably at the beginning of the file?)
+tweets[duplicated(tweets$id_str, fromLast = TRUE), ]
+tweets[duplicated(tweets$id_str), ]
+# No, the duplicates are two entirely empty tweets with only 
+# NA values. ... 
+# Hence the procedure of NOT adding any duplicate
+# tweets works effectively.
+
+
+# ------------------------------ # 
 table(tweets$created_at)
 
 table(tweets$user.lang)
