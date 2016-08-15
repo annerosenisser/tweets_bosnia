@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # This is a small scraper allowing to extract the most common
 # Bosnian, Croatian and Serbian words from the following websites:
 
