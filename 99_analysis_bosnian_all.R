@@ -48,11 +48,9 @@ length(unique(tweets$id_str))
 # duplicate (probably at the beginning of the file?)
 tweets[duplicated(tweets$id_str, fromLast = TRUE), ]
 tweets[duplicated(tweets$id_str), ]
-# No, the duplicates are two entirely empty tweets with only 
-# NA values. ... 
-# Hence the procedure of NOT adding any duplicate
-# tweets works effectively.
 
+# Exclude those duplicates: 
+tweets <- tweets[!duplicated(tweets$id_str), ]
 
 # ------------------------------ # 
 table(tweets$created_at)
