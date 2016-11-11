@@ -8,6 +8,9 @@
 rm(list = ls())
 setwd("~/Documents/15-16/Code/tweets_bosnia")
 
+# Displaying Bosnian characters correctly: 
+Sys.setlocale("LC_CTYPE", "UTF-8")
+
 # Inspiring links: 
 # http://juliasilge.com/blog/Ten-Thousand-Tweets/
 
@@ -33,8 +36,8 @@ tweets <- fromJSON(tweets_path,
 # tweets <- readLines(bosnian_all_tweets, warn = "F")
 
 
-tweets <- fromJSON("~/Documents/15-16/Data/bs_all_tweets.txt",
-                   simplifyDataFrame = T)
+# tweets <- fromJSON("~/Documents/15-16/Data/bs_all_tweets.txt",
+#                    simplifyDataFrame = T)
 # ------------------------------ # 
 names(tweets)
 
@@ -70,13 +73,27 @@ time[200:500]
 # Extract the relevant time variable: 
 time <- paste0(substring(time, 5, 10), ",", substring(time, 26, 30))
 time <- as.Date(time, format = "%b%d, %Y") # see http://www.statmethods.net/input/dates.html
+time <- time[time>=as.Date("2016-01-01")] # subset time just to 2016
 
-hist(time, breaks = 200)
+# hist(time, breaks = 200)
 # The temporal distribution looks quite ok. 
 
-
+plot(as.Date(names(table(time))), table(time), type = "l", 
+     yaxt = "n", xlab = "day", "ylab" = "# daily tweets")
+axis(2, at = pretty(table(time)), labels = pretty(table(time)))
+abline(v = as.Date("2016-10-02"), col = "red", cex = 2, lty = 2)
 
 # ------------------------------ # 
+# Examine those who tweeted 
+# How many tweets came from the news portal klix.ba? 
+names(tweets)
+t <- table(tweets$user.name)
+t <- sort(t, decreasing = T)
 
-
-
+par(mar = c(7.1, 4.1, 4.1, 4.1)) # bottom, left, top and right
+barplot(t, xaxt = "n", yaxt = "n", ylab = "# tweets")
+text(seq_along(t)*1.2, par("usr")[3] - 300, 
+     labels = names(t), srt = 45, pos = 2, xpd = NA, cex = 0.7)
+axis(2, at = pretty(t), labels = F, xpd = NA)
+text(par("usr")[1] - 0.2, pretty(t), 
+     labels = pretty(t), srt = 45, pos = 2, xpd = NA, cex = 0.7)
