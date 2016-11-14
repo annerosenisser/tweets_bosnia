@@ -82,6 +82,8 @@ plot(as.Date(names(table(time))), table(time), type = "l",
      yaxt = "n", xlab = "day", "ylab" = "# daily tweets")
 axis(2, at = pretty(table(time)), labels = pretty(table(time)))
 abline(v = as.Date("2016-10-02"), col = "red", cex = 2, lty = 2)
+text(as.Date("2016-10-02") - 4, mean(table(time)), "election day",
+     srt = 90, col = "red")
 
 # ------------------------------ # 
 # Examine those who tweeted 
