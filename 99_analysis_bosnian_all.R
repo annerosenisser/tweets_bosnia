@@ -70,10 +70,16 @@ class(tweets$created_at)
 time <- tweets$created_at
 time[200:500]
 
-# Extract the relevant time variable: 
-time <- paste0(substring(time, 5, 10), ",", substring(time, 26, 30))
-time <- as.Date(time, format = "%b%d, %Y") # see http://www.statmethods.net/input/dates.html
+# Extract the relevant time variable (create function to re-use later): 
+time_f <- function(time) {
+  time <- paste0(substring(time, 5, 10), ",", substring(time, 26, 30))
+  time <- as.Date(time, format = "%b%d, %Y") # see http://www.statmethods.net/input/dates.html
+  return(time)
+}
+
+time <- time_f(time)
 time <- time[time>=as.Date("2016-01-01")] # subset time just to 2016
+head(time)
 
 # hist(time, breaks = 200)
 # The temporal distribution looks quite ok. 
@@ -99,3 +105,38 @@ text(seq_along(t)*1.2, par("usr")[3] - 300,
 axis(2, at = pretty(t), labels = F, xpd = NA)
 text(par("usr")[1] - 0.2, pretty(t), 
      labels = pretty(t), srt = 45, pos = 2, xpd = NA, cex = 0.7)
+
+# ------------------------------ # 
+# Plot the longitudinal distribution by user type: 
+# is the user a politician/political party
+# or a news portal? 
+# Users that are news portals: 
+# Vijesti Herceg Bosne, Klix.ba
+sub <- subset(tweets, select = c("created_at", "user.name"))
+names(sub) <- c("time", "user")
+
+# Just keep the date for the time variable (and not the exact time stamp):
+
+
+# make new user variable to distinguish between news portal
+# and politician/political party:
+sub$user2 <- ifelse(sub$user %in% c("Vijesti Herceg Bosne",
+                                    "Klix.ba"), "news",
+                    ifelse(!is.na(sub$user), "politician", NA))
+sub$time <- time_f(sub$time) # reshape time variable with function (defined above)
+sub <- sub[sub$time>=as.Date("2016-01-01"), ] # restrict to observation in 2016
+t <- table(sub$time, sub$user2)
+head(t)
+t <- as.data.frame(t)
+names(t) <- c("date", "cat", "Freq")
+t$date <- as.Date(as.character(t$date))
+require(ggplot2)
+e <- as.Date("2016-10-02")
+ggplot(t, aes(date, Freq, group = cat)) + 
+  geom_line(aes(color = cat)) + 
+  geom_vline(aes(xintercept=as.numeric(e)), 
+             colour="#990000", linetype="dashed") +
+  annotate(geom= "text", label = "elections", 
+           x = e-4, y = 100, angle = 90) + 
+  scale_y_continuous(name = "# tweets") + 
+  ggtitle("Number of tweets by user category over time")
